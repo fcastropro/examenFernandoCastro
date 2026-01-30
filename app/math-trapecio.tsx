@@ -10,7 +10,7 @@ export default function MathTrapecioScreen() {
   const BN = Number(B || 0);
   const bN = Number(b || 0);
   const hN = Number(h || 0);
-  const [shift, setShift] = React.useState("diurna");
+  const [shift, setShift] = React.useState("regular");
 
   const area = React.useMemo(() => {
     return ((BN + bN) / 2) * hN;

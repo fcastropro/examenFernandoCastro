@@ -1,47 +1,90 @@
-import { Picker } from '@react-native-picker/picker';
+import { Picker } from "@react-native-picker/picker";
 import React from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-export default function MathTrapecioScreen() {
-  const [B, setB] = React.useState("10");
-  const [b, setb] = React.useState("6");
-  const [h, seth] = React.useState("4");
+export default function PuntajeAdmisionScreen() {
+  const [exam, setExam] = React.useState("");
+  const [avg, setAvg] = React.useState("");
+  const [type, setType] = React.useState("regular");
+  const [result, setResult] = React.useState({
+    final: 0,
+    status: "",
+  });
 
-  const BN = Number(B || 0);
-  const bN = Number(b || 0);
-  const hN = Number(h || 0);
-  const [shift, setShift] = React.useState("regular");
+  const calculate = () => {
+    const examN = Number(exam);
+    const avgN = Number(avg);
 
-  const area = React.useMemo(() => {
-    return ((BN + bN) / 2) * hN;
-  }, [BN, bN, hN]);
+    if (
+      examN < 0 ||
+      examN > 1000 ||
+      avgN < 0 ||
+      avgN > 10 ||
+      isNaN(examN) ||
+      isNaN(avgN)
+    ) {
+      setResult({ final: 0, status: "" });
+      return;
+    }
+
+    const prom1000 = (avgN / 10) * 1000;
+    const base = examN * 0.7 + prom1000 * 0.3;
+
+    let bonus = 0;
+    if (type === "deportista") bonus = 30;
+    if (type === "merito") bonus = 50;
+
+    const finalScore = base + bonus;
+    const status = finalScore >= 750 ? "APTO" : "NO APTO";
+
+    setResult({ final: finalScore, status });
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Puntaje de admisión</Text>
-      
 
       <View style={styles.card}>
         <Text style={styles.label}>Nota examen (0–1000)</Text>
-        <TextInput value={B} onChangeText={setB} keyboardType="numeric" style={styles.input} />
+        <TextInput
+          value={exam}
+          onChangeText={setExam}
+          keyboardType="numeric"
+          style={styles.input}
+        />
 
         <Text style={styles.label}>Promedio colegio (0–10)</Text>
-        <TextInput value={b} onChangeText={setb} keyboardType="numeric" style={styles.input} />
+        <TextInput
+          value={avg}
+          onChangeText={setAvg}
+          keyboardType="numeric"
+          style={styles.input}
+        />
+
         <Text style={styles.label}>Tipo de aspirante</Text>
-        <Picker selectedValue={shift} onValueChange={(v) => setShift(String(v))}>
+        <Picker selectedValue={type} onValueChange={setType}>
           <Picker.Item label="Regular" value="regular" />
           <Picker.Item label="Deportista" value="deportista" />
           <Picker.Item label="Mérito académico" value="merito" />
         </Picker>
+
+        <Pressable style={styles.button} onPress={calculate}>
+          <Text style={styles.buttonText}>Calcular</Text>
+        </Pressable>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.total}>Normalización del promedio colegio: 100</Text>
-        <Text style={styles.total}>Puntaje base: 100</Text>
-        <Text style={styles.total}>Bono por tipo: +30</Text>
-        <Text style={styles.total}>Puntaje final: 130</Text>
-        <Text style={styles.total}>Estado: Aprobado</Text>
-        <Text style={styles.muted}>Cambia los valores y observa el resultado.</Text>
+        <Text style={styles.total}>
+          Puntaje final: {result.final.toFixed(2)}
+        </Text>
+        <Text
+          style={[
+            styles.status,
+            { color: result.status === "APTO" ? "green" : "red" },
+          ]}
+        >
+          Estado: {result.status}
+        </Text>
       </View>
     </View>
   );
@@ -50,7 +93,6 @@ export default function MathTrapecioScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#f6f7fb" },
   title: { fontSize: 22, fontWeight: "900" },
-  subtitle: { marginTop: 4, color: "#555", fontWeight: "700" },
   card: {
     backgroundColor: "white",
     padding: 14,
@@ -69,6 +111,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0,0,0,.10)",
   },
+  button: {
+    marginTop: 14,
+    backgroundColor: "#4f46e5",
+    padding: 12,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  buttonText: { color: "white", fontWeight: "900" },
   total: { fontWeight: "900", fontSize: 20 },
-  muted: { color: "#666", fontWeight: "700", marginTop: 6 },
+  status: { marginTop: 6, fontWeight: "900", fontSize: 18 },
 });
